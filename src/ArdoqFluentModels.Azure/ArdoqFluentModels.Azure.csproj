@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+<PropertyGroup>
+    <PackageId>ArdoqFluentModels.Azure</PackageId>
+    <Authors>Hafslund Nett AS</Authors>
+    <Description>Azure source model for the Ardoq fluent models mapping library. Seee https://github.com/hafslundnett/ardoq-fluent-models-azure.git </Description>
+    <PackageLicenseUrl>http://www.opensource.org/licenses/mit-license.php</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ArdoqFluentModels" Version="0.0.9" />
+    <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.24.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Model\" />
+  </ItemGroup>
+
+</Project>

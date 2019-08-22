@@ -1,0 +1,47 @@
+trigger:
+  tags:
+    include:
+    - v*.*.*
+
+# pool:
+#   vmImage: 'Ubuntu-16.04'
+
+variables:
+  buildProject: 'src/ArdoqFluentModels.Azure/ArdoqFluentModels.Azure.csproj'
+  Version: $(Build.BuildNumber)
+
+steps:
+- powershell: |
+   $ver = $env:BUILD_SOURCEBRANCH.remove(0, 11)
+   Write-Host "##vso[task.setvariable variable=Version]$ver"
+  displayName: 'Update version to Tag'
+  condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: restore
+    projects: $(buildProject)
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: build
+    projects: $(buildProject)
+    arguments: '--no-restore'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet pack'
+  inputs:
+    command: pack
+    packagesToPack: $(buildProject)
+    versioningScheme: byEnvVar
+    versionEnvVar: Version
+
+- task: NuGetCommand@2
+  displayName: 'Publish NuGet package'
+  inputs:
+    command: push
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+    nuGetFeedType: external
+    publishFeedCredentials: NuGetLibs
