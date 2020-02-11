@@ -72,7 +72,7 @@ namespace ArdoqFluentModels.Azure
                 resourceGroup.CdnProfiles.AddRange(ReadCdnProfiles(azureResourceGroup));
                 // resourceGroup.ComputeSkus.AddRange(ReadComputeSkus(azureResourceGroup));
                 resourceGroup.Disks.AddRange(ReadDisks(azureResourceGroup));
-                resourceGroup.DnsZones.AddRange(ReadDnsZones(azureResourceGroup));
+                //resourceGroup.DnsZones.AddRange(ReadDnsZones(azureResourceGroup));
                 resourceGroup.NetworkSecurityGroups.AddRange(ReadNetworkSecurityGroups(azureResourceGroup));
                 resourceGroup.VirtualNetworks.AddRange(ReadVirtualNetworks(azureResourceGroup));
                 resourceGroup.PublicIPAddresses.AddRange(ReadPublicIPAddresses(azureResourceGroup));
