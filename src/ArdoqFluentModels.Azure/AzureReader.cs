@@ -2,6 +2,7 @@
 using Microsoft.Azure.Management.Compute.Fluent;
 using Microsoft.Azure.Management.Fluent;
 using Microsoft.Azure.Management.ResourceManager.Fluent;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -10,6 +11,7 @@ namespace ArdoqFluentModels.Azure
     public class AzureReader : IAzureReader
     {
         private readonly IAzure _azure;
+        private readonly ILogger _logger;
 
         public string SubscriptionName { get; }
 
@@ -17,8 +19,11 @@ namespace ArdoqFluentModels.Azure
             string clientId,
             string clientSecret,
             string tenantId,
-            string subscriptionId)
+            string subscriptionId,
+            ILogger logger = null)
         {
+            _logger = logger ?? new ConsoleLogger();
+
             var credentials = SdkContext.AzureCredentialsFactory
                 .FromServicePrincipal(
                     clientId,
@@ -54,36 +59,43 @@ namespace ArdoqFluentModels.Azure
             {
                 var resourceGroup = new ResourceGroup(azureResourceGroup);
 
-                resourceGroup.EventHubsNamespaces.AddRange(ReadEventHubsNamespaces(azureResourceGroup));
-                resourceGroup.SqlServers.AddRange(ReadSqlDatabases(azureResourceGroup));
-                resourceGroup.StorageAccounts.AddRange(ReadStorageAccounts(azureResourceGroup));
-                resourceGroup.ServiceBusNamespaces.AddRange(ReadServiceBusNamespaces(azureResourceGroup));
-                resourceGroup.SearchServices.AddRange(ReadSearchServices(azureResourceGroup));
-                resourceGroup.RedisCaches.AddRange(ReadRedisCaches(azureResourceGroup));
-                resourceGroup.CosmosDBAccounts.AddRange(ReadCosmosDBAccounts(azureResourceGroup));
-                resourceGroup.KeyVaults.AddRange(ReadKeyVaults(azureResourceGroup));
+                try 
+                { 
+                    resourceGroup.EventHubsNamespaces.AddRange(ReadEventHubsNamespaces(azureResourceGroup));
+                    resourceGroup.SqlServers.AddRange(ReadSqlDatabases(azureResourceGroup));
+                    resourceGroup.StorageAccounts.AddRange(ReadStorageAccounts(azureResourceGroup));
+                    resourceGroup.ServiceBusNamespaces.AddRange(ReadServiceBusNamespaces(azureResourceGroup));
+                    resourceGroup.SearchServices.AddRange(ReadSearchServices(azureResourceGroup));
+                    resourceGroup.RedisCaches.AddRange(ReadRedisCaches(azureResourceGroup));
+                    resourceGroup.CosmosDBAccounts.AddRange(ReadCosmosDBAccounts(azureResourceGroup));
+                    resourceGroup.KeyVaults.AddRange(ReadKeyVaults(azureResourceGroup));
 
-                // resourceGroup.AlertRules.AddRange(ReadAlertRules(azureResourceGroup));
-                // resourceGroup.AccessManagements.AddRange(ReadAccessManagements(azureResourceGroup));
-                resourceGroup.ApplicationGateways.AddRange(ReadApplicationGateways(azureResourceGroup));
-                resourceGroup.AutoscaleSettings.AddRange(ReadAutoscaleSettings(azureResourceGroup));
-                resourceGroup.AvailabilitySets.AddRange(ReadAvailabilitySets(azureResourceGroup));
-                resourceGroup.BatchAccounts.AddRange(ReadBatchAccounts(azureResourceGroup));
-                resourceGroup.CdnProfiles.AddRange(ReadCdnProfiles(azureResourceGroup));
-                // resourceGroup.ComputeSkus.AddRange(ReadComputeSkus(azureResourceGroup));
-                resourceGroup.Disks.AddRange(ReadDisks(azureResourceGroup));
-                //resourceGroup.DnsZones.AddRange(ReadDnsZones(azureResourceGroup));
-                resourceGroup.NetworkSecurityGroups.AddRange(ReadNetworkSecurityGroups(azureResourceGroup));
-                resourceGroup.VirtualNetworks.AddRange(ReadVirtualNetworks(azureResourceGroup));
-                resourceGroup.PublicIPAddresses.AddRange(ReadPublicIPAddresses(azureResourceGroup));
-                resourceGroup.Snapshots.AddRange(ReadSnapshots(azureResourceGroup));
-                resourceGroup.TrafficManagerProfiles.AddRange(ReadTrafficManagerProfiles(azureResourceGroup));
-                resourceGroup.VirtualMachines.AddRange(ReadVirtualMachines(azureResourceGroup));
-                resourceGroup.VirtualMachineCustomImages.AddRange(ReadVirtualMachineCustomImages(azureResourceGroup));
-                resourceGroup.VirtualMachineScaleSets.AddRange(ReadVirtualMachineScaleSets(azureResourceGroup));
-                resourceGroup.LoadBalancers.AddRange(ReadLoadBalancers(azureResourceGroup));
+                    // resourceGroup.AlertRules.AddRange(ReadAlertRules(azureResourceGroup));
+                    // resourceGroup.AccessManagements.AddRange(ReadAccessManagements(azureResourceGroup));
+                    resourceGroup.ApplicationGateways.AddRange(ReadApplicationGateways(azureResourceGroup));
+                    resourceGroup.AutoscaleSettings.AddRange(ReadAutoscaleSettings(azureResourceGroup));
+                    resourceGroup.AvailabilitySets.AddRange(ReadAvailabilitySets(azureResourceGroup));
+                    resourceGroup.BatchAccounts.AddRange(ReadBatchAccounts(azureResourceGroup));
+                    resourceGroup.CdnProfiles.AddRange(ReadCdnProfiles(azureResourceGroup));
+                    // resourceGroup.ComputeSkus.AddRange(ReadComputeSkus(azureResourceGroup));
+                    resourceGroup.Disks.AddRange(ReadDisks(azureResourceGroup));
+                    //resourceGroup.DnsZones.AddRange(ReadDnsZones(azureResourceGroup));
+                    resourceGroup.NetworkSecurityGroups.AddRange(ReadNetworkSecurityGroups(azureResourceGroup));
+                    resourceGroup.VirtualNetworks.AddRange(ReadVirtualNetworks(azureResourceGroup));
+                    resourceGroup.PublicIPAddresses.AddRange(ReadPublicIPAddresses(azureResourceGroup));
+                    resourceGroup.Snapshots.AddRange(ReadSnapshots(azureResourceGroup));
+                    resourceGroup.TrafficManagerProfiles.AddRange(ReadTrafficManagerProfiles(azureResourceGroup));
+                    resourceGroup.VirtualMachines.AddRange(ReadVirtualMachines(azureResourceGroup));
+                    resourceGroup.VirtualMachineCustomImages.AddRange(ReadVirtualMachineCustomImages(azureResourceGroup));
+                    resourceGroup.VirtualMachineScaleSets.AddRange(ReadVirtualMachineScaleSets(azureResourceGroup));
+                    resourceGroup.LoadBalancers.AddRange(ReadLoadBalancers(azureResourceGroup));
 
-                //ListApplicationInsights(resourceGroup);
+                    //ListApplicationInsights(resourceGroup);
+                }
+                catch (Exception ex) 
+                { 
+                    _logger.LogException(ex); 
+                };
 
                 resourceGroups.Add(resourceGroup);
             }
@@ -358,20 +370,27 @@ namespace ArdoqFluentModels.Azure
         private List<ServiceBusNamespace> ReadServiceBusNamespaces(IResourceGroup resourceGroup)
         {
             var serviceBusNamespaces = new List<ServiceBusNamespace>();
-            var azureServiceBusNamespaces = _azure.ServiceBusNamespaces.ListByResourceGroup(resourceGroup.Name);
-            foreach (var azureServiceBusNamespace in azureServiceBusNamespaces)
+            try
             {
-                var serviceBusNamespace = new ServiceBusNamespace(azureServiceBusNamespace);
-                foreach (var queue in azureServiceBusNamespace.Queues.List())
+                var azureServiceBusNamespaces = _azure.ServiceBusNamespaces.ListByResourceGroup(resourceGroup.Name);
+                foreach (var azureServiceBusNamespace in azureServiceBusNamespaces)
                 {
-                    serviceBusNamespace.AddQueue(new ServiceBusQueue { Name = queue.Name });
+                    var serviceBusNamespace = new ServiceBusNamespace(azureServiceBusNamespace);
+                    foreach (var queue in azureServiceBusNamespace.Queues.List())
+                    {
+                        serviceBusNamespace.AddQueue(new ServiceBusQueue { Name = queue.Name });
+                    }
+                    foreach (var topic in azureServiceBusNamespace.Topics.List())
+                    {
+                        serviceBusNamespace.AddTopic(new ServiceBusTopic { Name = topic.Name });
+                    }
+                    serviceBusNamespaces.Add(serviceBusNamespace);
                 }
-                foreach (var topic in azureServiceBusNamespace.Topics.List())
-                {
-                    serviceBusNamespace.AddTopic(new ServiceBusTopic { Name = topic.Name });
-                }
-                serviceBusNamespaces.Add(serviceBusNamespace);
             }
+            catch (Exception ex)
+            {
+                _logger.LogException(ex);
+            };
             return serviceBusNamespaces;
         }
 
