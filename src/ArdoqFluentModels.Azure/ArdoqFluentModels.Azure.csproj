@@ -5,14 +5,15 @@
   </PropertyGroup>
 
 <PropertyGroup>
-    <PackageId>ArdoqFluentModels.Azure</PackageId>
+    <PackageId>Ardoq.FluentModels.Azure</PackageId>
     <Authors>Elvia AS</Authors>
     <Description>Azure source model for the Ardoq fluent models mapping library. Seee https://github.com/3lvia/libraries-ardoq-fluent-models-azure.git</Description>
     <PackageLicenseUrl>http://www.opensource.org/licenses/mit-license.php</PackageLicenseUrl>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ArdoqFluentModels" Version="0.0.4" />
+    <PackageReference Include="Ardoq.FluentModels" Version="1.0.0" />
     <PackageReference Include="Microsoft.Azure.Management.Fluent" Version="1.24.1" />
   </ItemGroup>
 
